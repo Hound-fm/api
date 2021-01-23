@@ -16,6 +16,7 @@
     "express": "^4.17.1",
     "express-validator": "^6.9.2",
     "helmet": "^4.2.0",
+    "hpp": "^0.2.3",
     "rate-limiter-flexible": "^2.2.1",
     "redis": "^3.0.2"
   },

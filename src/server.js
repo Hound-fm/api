@@ -1,6 +1,7 @@
+import hpp from "hpp";
+import cors from "cors";
 import helmet from "helmet";
 import express from "express";
-import cors from "cors";
 import rateLimiterRedisMiddleware from "./middlewares/rateLimiterRedis";
 import { home, content, knowledge } from "./routes";
 
@@ -11,6 +12,8 @@ class Server {
     this.app.use(cors());
     this.app.use(rateLimiterRedisMiddleware);
     this.app.use(express.json());
+    this.app.use(express.urlencoded({extended: true}));
+    this.app.use(hpp());
     this.server();
     this.routes();
   }
