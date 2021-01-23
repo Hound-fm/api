@@ -1,0 +1,24 @@
+{
+  "name": "api.hound.fm",
+  "version": "0.0.1",
+  "description": "REST API for the Hound.fm project",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "build": "sucrase ./src -d ./dist --transforms imports",
+    "start": "node dist/server.js",
+    "format": "npx -p prettier@latest -p pretty-quick pretty-quick"
+  },
+  "dependencies": {
+    "@elastic/elasticsearch": "^7.10.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-validator": "^6.9.2",
+    "helmet": "^4.2.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6",
+    "sucrase": "^3.16.0"
+  }
+}
