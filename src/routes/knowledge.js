@@ -1,8 +1,10 @@
 import path from "path";
 import elastic from "../elastic";
 import { Router } from "express";
+import { ERROR_UKNOWN } from "../error"
 import { promises as fs } from "fs";
 import { validationResult } from "express-validator";
+
 import {
   validateGroup,
   validateCategory,
@@ -32,11 +34,10 @@ router.get("/:category", validateCategory, validateGroup, async (req, res) => {
 
     const result_json = JSON.parse(latest_stats);
     return res.json(result_json);
-  } catch (error) {
-    if (error && error.errors) {
-      return res.status(400).json(error);
-    }
-    return res.status(400).json({ error: "Error!" });
+  } catch (errorData) {
+    const {errors} = errorData
+    const error = (errors && errors.length) ? errors.map(err => err.msg)[0] : ERROR_UKNOWN
+    return res.status(400).json({ error });
   }
 });
 

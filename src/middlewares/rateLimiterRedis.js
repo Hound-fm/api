@@ -1,4 +1,5 @@
-const { RateLimiterMemory } = require("rate-limiter-flexible");
+import { RateLimiterMemory } from "rate-limiter-flexible";
+import { ERROR_RATE_LIMIT } from "../error"
 
 const rateLimiter = new RateLimiterMemory({
   keyPrefix: "middleware",
@@ -13,7 +14,7 @@ const rateLimiterMiddleware = (req, res, next) => {
       next();
     })
     .catch(() => {
-      res.status(429).send("Too Many Requests");
+      res.status(429).json({ error: ERROR_RATE_LIMIT });
     });
 };
 

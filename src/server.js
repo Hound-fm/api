@@ -2,6 +2,7 @@ import hpp from "hpp";
 import cors from "cors";
 import helmet from "helmet";
 import express from "express";
+import errorHandler from "./middlewares/errorHandler";
 import rateLimiterRedisMiddleware from "./middlewares/rateLimiterRedis";
 import { home, content, knowledge } from "./routes";
 
@@ -12,7 +13,7 @@ class Server {
     this.app.use(cors());
     this.app.use(rateLimiterRedisMiddleware);
     this.app.use(express.json());
-    this.app.use(express.urlencoded({extended: true}));
+    this.app.use(express.urlencoded({ extended: true }));
     this.app.use(hpp());
     this.server();
     this.routes();
@@ -27,6 +28,9 @@ class Server {
 
     // Get knowledge from content
     this.app.use("/knowledge", knowledge);
+
+    // Handle 404 error
+    this.app.use(errorHandler);
   }
 
   server() {

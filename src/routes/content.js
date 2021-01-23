@@ -1,5 +1,6 @@
 import elastic from "../elastic";
 import { Router } from "express";
+import { ERROR_UKNOWN } from "../error"
 import { validationResult } from "express-validator";
 import {
   validateGroup,
@@ -59,8 +60,10 @@ router.get(
         ...hit._source,
       }));
       res.json(result_json);
-    } catch (error) {
-      return res.status(400).json(error);
+    } catch (errorData) {
+      const {errors} = errorData
+      const error = (errors && errors.length) ? errors.map(err => err.msg)[0] : ERROR_UKNOWN
+      return res.status(400).json({error});
     }
   }
 );
