@@ -3,7 +3,11 @@ import elastic from "../elastic";
 import { Router } from "express";
 import { promises as fs } from "fs";
 import { validationResult } from "express-validator";
-import { validateGroup, validateCategory, validateGenre } from "../validation";
+import {
+  validateGroup,
+  validateCategory,
+  validateGenre,
+} from "../middlewares/validation";
 
 const knowledge_dir = path.resolve(process.cwd(), "../scrapz/src/data/stats");
 const router = Router();

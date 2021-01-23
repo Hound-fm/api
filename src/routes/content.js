@@ -1,7 +1,11 @@
 import elastic from "../elastic";
 import { Router } from "express";
 import { validationResult } from "express-validator";
-import { validateGroup, validateCategory, validateGenre } from "../validation";
+import {
+  validateGroup,
+  validateCategory,
+  validateGenre,
+} from "../middlewares/validation";
 
 const router = Router();
 

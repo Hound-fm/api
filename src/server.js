@@ -1,7 +1,7 @@
 import helmet from "helmet";
 import express from "express";
-
 import cors from "cors";
+import rateLimiterRedisMiddleware from "./middlewares/rateLimiterRedis";
 import { home, content, knowledge } from "./routes";
 
 class Server {
@@ -9,6 +9,7 @@ class Server {
     this.app = express();
     this.app.use(helmet());
     this.app.use(cors());
+    this.app.use(rateLimiterRedisMiddleware);
     this.app.use(express.json());
     this.server();
     this.routes();
