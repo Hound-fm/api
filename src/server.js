@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import express from "express";
 import errorHandler from "./middlewares/errorHandler";
+import cacheMiddleware from "./middlewares/cache";
 import rateLimiterRedisMiddleware from "./middlewares/rateLimiterRedis";
 import { home, content, knowledge } from "./routes";
 
@@ -15,6 +16,7 @@ class Server {
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(hpp());
+    this.app.use(cacheMiddleware);
     this.server();
     this.routes();
   }
