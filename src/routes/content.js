@@ -25,8 +25,9 @@ router.get(
       const validation = validationResult(req).throw();
       const { category } = req.params;
       const { genre, group } = req.query;
+
+      let sort;
       let query = { match: { stream_type: category } };
-      let sort = [{ discovered_at: { order: "desc" } }];
 
       if (genre) {
         query = {
@@ -37,6 +38,10 @@ router.get(
             ],
           },
         };
+      }
+
+      if (group && group == "latest") {
+        sort = [{ discovered_at: { order: "desc" } }];
       }
 
       if (group && group == "popular") {

@@ -8,7 +8,7 @@ import {
 const groups = ["latest", "popular"];
 const categories = ["music", "podcast", "audiobook"];
 
-export const validateGroup = query("group").isIn(groups).withMessage(ERROR_INVALID_GROUP);
+export const validateGroup = query("group").optional().isIn(groups).withMessage(ERROR_INVALID_GROUP);
 export const validateGenre = query("genre")
   .optional()
   .isLength({ min: 2, max: 24 })
