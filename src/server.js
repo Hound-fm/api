@@ -1,3 +1,7 @@
+import { config } from "dotenv";
+// Load config from env file
+config();
+
 import hpp from "hpp";
 import cors from "cors";
 import helmet from "helmet";
@@ -5,7 +9,7 @@ import express from "express";
 import errorHandler from "./middlewares/errorHandler";
 import cacheMiddleware from "./middlewares/cache";
 import rateLimiterRedisMiddleware from "./middlewares/rateLimiterRedis";
-import { home, content, knowledge } from "./routes";
+import { home, content, stats } from "./routes";
 
 class Server {
   constructor() {
@@ -29,7 +33,7 @@ class Server {
     this.app.use("/content", content);
 
     // Get knowledge from content
-    this.app.use("/knowledge", knowledge);
+    this.app.use("/stats", stats);
 
     // Handle 404 error
     this.app.use(errorHandler);

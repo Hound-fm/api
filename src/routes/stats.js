@@ -11,7 +11,7 @@ import {
   validateGenre,
 } from "../middlewares/validation";
 
-const knowledge_dir = path.resolve(process.cwd(), "../scrapz/src/data/stats");
+const knowledge_dir = path.resolve(process.cwd(), process.env.KORAT_PATH);
 const router = Router();
 
 // Router middleware, mentioned it before defining routes.

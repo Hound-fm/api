@@ -1,4 +1,4 @@
-const DEAFAULT_TIME = 60 * 30; // 30 minutes
+const DEAFAULT_TIME = 60 * 5; // 5 minutes
 
 const cacheMiddleware = (req, res, next) => {
   // Here you can define period in second, this one is 5 minutes
@@ -11,7 +11,6 @@ const cacheMiddleware = (req, res, next) => {
     // For the other requests set strict no caching parameters
     res.set("Cache-Control", `no-store`);
   }
-
   // Remember to call next() to pass on the request
   next();
 };

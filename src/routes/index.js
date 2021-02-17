@@ -1,4 +1,4 @@
 import home from "./home";
+import stats from "./stats";
 import content from "./content";
-import knowledge from "./knowledge";
-export { home, content, knowledge };
+export { home, content, stats };

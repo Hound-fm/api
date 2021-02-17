@@ -3,9 +3,10 @@ import { Router } from "express";
 import { ERROR_UKNOWN } from "../error"
 import { validationResult } from "express-validator";
 import {
+  validatePage,
   validateGroup,
-  validateCategory,
   validateGenre,
+  validateCategory,
 } from "../middlewares/validation";
 
 const router = Router();
@@ -19,12 +20,14 @@ router.get(
   validateCategory,
   validateGroup,
   validateGenre,
-
+  validatePage,
   async (req, res) => {
     try {
       const validation = validationResult(req).throw();
       const { category } = req.params;
-      const { genre, group } = req.query;
+      const { genre, group, page } = req.query;
+      const pageIndex = page || 0
+      const pageSize = 10
 
       let sort;
       let query = { match: { stream_type: category } };
@@ -46,15 +49,15 @@ router.get(
 
       if (group && group == "popular") {
         sort = [
-          { repost_count: { order: "desc" } },
           { view_count: { order: "desc" } },
+          { repost_count: { order: "desc" } },
         ];
       }
 
       const result = await elastic.search({
         index: "streams_index",
-        from: 0,
-        size: 20,
+        from: pageSize * pageIndex,
+        size: pageSize,
         body: { sort, query },
       });
 

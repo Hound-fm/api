@@ -1,8 +1,5 @@
 import { Client } from "@elastic/elasticsearch";
-import { config } from "dotenv";
 
-// Load config from env
-config();
 
 const client = new Client({
   node: process.env.ELASTIC_NODE,
