@@ -1,6 +1,6 @@
 import elastic from "../elastic";
 import { Router } from "express";
-import { ERROR_UKNOWN } from "../error"
+import { ERROR_UKNOWN } from "../error";
 import { validationResult } from "express-validator";
 import {
   validatePage,
@@ -26,8 +26,8 @@ router.get(
       const validation = validationResult(req).throw();
       const { category } = req.params;
       const { genre, group, page } = req.query;
-      const pageIndex = page || 0
-      const pageSize = 10
+      const pageIndex = page || 0;
+      const pageSize = 10;
 
       let sort;
       let query = { match: { stream_type: category } };
@@ -69,9 +69,12 @@ router.get(
       }));
       res.json(result_json);
     } catch (errorData) {
-      const {errors} = errorData
-      const error = (errors && errors.length) ? errors.map(err => err.msg)[0] : ERROR_UKNOWN
-      return res.status(400).json({error});
+      const { errors } = errorData;
+      const error =
+        errors && errors.length
+          ? errors.map((err) => err.msg)[0]
+          : ERROR_UKNOWN;
+      return res.status(400).json({ error });
     }
   }
 );
