@@ -42,4 +42,21 @@ router.get("/:category", validateCategory, validateGroup, async (req, res) => {
   }
 });
 
+router.get("/tags/:category", validateCategory, async (req, res) => {
+  try {
+    const validation = validationResult(req).throw();
+    const { category } = req.params;
+    let filePath = `/tags_frequency_${category}.json`;
+    const stats = await fs.readFile(path.join(knowledge_dir, filePath));
+    const result_json = JSON.parse(stats);
+    return res.json(result_json);
+  } catch (errorData) {
+    const { errors } = errorData;
+    const error =
+      errors && errors.length ? errors.map((err) => err.msg)[0] : ERROR_UKNOWN;
+    return res.status(400).json({ error });
+  }
+});
+
+
 export default router;
