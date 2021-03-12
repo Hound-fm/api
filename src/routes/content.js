@@ -3,10 +3,11 @@ import { Router } from "express";
 import { ERROR_UKNOWN } from "../error";
 import { validationResult } from "express-validator";
 import {
-  validatePage,
   validateGroup,
   validateGenre,
   validateCategory,
+  validatePageSize,
+  validatePageIndex,
 } from "../middlewares/validation";
 
 const router = Router();
@@ -17,17 +18,20 @@ router.use((req, res, next) => next());
 // Provide latest content of a specific category
 router.get(
   "/:category",
-  validateCategory,
   validateGroup,
   validateGenre,
-  validatePage,
+  validateCategory,
+  validatePageSize,
+  validatePageIndex,
   async (req, res) => {
     try {
       const validation = validationResult(req).throw();
       const { category } = req.params;
-      const { genre, group, page } = req.query;
-      const pageIndex = page || 0;
-      const pageSize = 10;
+      const { genre, group, page_index, page_size } = req.query;
+
+      // Range limits
+      const size = page_size || 10;
+      const from = (page_index || 0) * size;
 
       let sort;
       let query = { match: { stream_type: category } };
@@ -55,9 +59,9 @@ router.get(
       }
 
       const result = await elastic.search({
+        size,
+        from,
         index: "streams_index",
-        from: pageSize * pageIndex,
-        size: pageSize,
         body: { sort, query },
       });
 
