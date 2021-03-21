@@ -1,6 +1,7 @@
 import elastic from "../elastic";
 import { Router } from "express";
 import { ERROR_UKNOWN } from "../error";
+import { POPULAR_SCORE } from "../scores";
 import { validationResult } from "express-validator";
 import {
   validateGroup,
@@ -52,10 +53,8 @@ router.get(
       }
 
       if (group && group == "popular") {
-        sort = [
-          { view_count: { order: "desc" } },
-          { repost_count: { order: "desc" } },
-        ];
+        const function_score = { query, ...POPULAR_SCORE };
+        query = { function_score };
       }
 
       const result = await elastic.search({
@@ -73,6 +72,7 @@ router.get(
       }));
       res.json(result_json);
     } catch (errorData) {
+      console.info(errorData.body);
       const { errors } = errorData;
       const error =
         errors && errors.length
