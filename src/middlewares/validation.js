@@ -7,7 +7,7 @@ import {
 } from "../error";
 
 const groups = ["latest", "popular"];
-const categories = ["music", "podcast", "audiobook"];
+const categories = ["music", "podcast", "audiobook", "sfx"];
 
 export const validateGroup = query("group")
   .optional()
