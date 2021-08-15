@@ -2,9 +2,9 @@ import { RateLimiterMemory } from "rate-limiter-flexible";
 import { ERROR_RATE_LIMIT } from "../error"
 
 const rateLimiter = new RateLimiterMemory({
-  keyPrefix: "middleware",
   points: 10, // 10 requests
   duration: 1, // per 1 second by IP
+  keyPrefix: "middleware",
 });
 
 const rateLimiterMiddleware = (req, res, next) => {

@@ -1,8 +1,34 @@
-import { ERROR_404 } from "../error";
+import { ERROR_UKNOWN, ERROR_404 } from "../error";
 
-const errorMiddleware = (req, res, next) => {
-  console.info(res.statusCode);
-  res.status(404).json({ error: ERROR_404 });
+export class RouterError extends Error {
+  constructor(message, statusCode = 404) {
+    super(message);
+    this.name = "RouterError";
+    this.message = message;
+    this.statusCode = statusCode;
+  }
+}
+
+export class ValidationError extends Error {
+  constructor(errorData, statusCode = 404) {
+    super();
+    const { errors } = errorData;
+    const message =
+      errors && errors.length ? errors.map((err) => err.msg)[0] : ERROR_UKNOWN;
+    this.name = "ValidatorError";
+    this.message = message;
+    this.statusCode = statusCode;
+  }
+}
+
+export const errorMiddleware = (req, res, next) => {
+  const error = new RouterError(ERROR_404, 404);
+  next(error);
 };
 
-export default errorMiddleware;
+export const errorHandlerMiddleware = (err, req, res, next) => {
+  if (err && err.statusCode) {
+    res.status(err.statusCode);
+  }
+  res.json({ error: { status: err.statusCode, message: err.message } });
+};

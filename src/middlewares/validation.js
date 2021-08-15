@@ -1,5 +1,7 @@
 import { param, query } from "express-validator";
 import {
+  ERROR_404,
+  ERROR_INVALID_ID,
   ERROR_INVALID_PAGE,
   ERROR_INVALID_GROUP,
   ERROR_INVALID_GENRE,
@@ -8,6 +10,19 @@ import {
 
 const groups = ["latest", "popular"];
 const categories = ["music", "podcast", "audiobook", "sfx"];
+
+const isHex = (str) => {
+  const hex = /[0-9A-Fa-f]{6}/g;
+  return hex.test(str);
+};
+
+const isClaimID = (str) => str.length === 40 && isHex(str);
+
+export const validateId = param("id")
+  .not()
+  .isEmpty()
+  .trim()
+  .custom((value) => isClaimID(value) || Promise.reject(ERROR_404));
 
 export const validateGroup = query("group")
   .optional()
