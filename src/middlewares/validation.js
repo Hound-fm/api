@@ -24,6 +24,13 @@ export const validateId = param("id")
   .trim()
   .custom((value) => isClaimID(value) || Promise.reject(ERROR_404));
 
+
+  export const validateSearchQuery = query("q")
+    .optional()
+    .not()
+    .isEmpty()
+    .trim()
+
 export const validateGroup = query("group")
   .optional()
   .isIn(groups)

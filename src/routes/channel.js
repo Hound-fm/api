@@ -6,7 +6,7 @@ async function ArtistRoute(req, res, next) {
   try {
     const validation = validationResult(req).throw();
     const { id } = req.params;
-    const data = await elastic.getById("artists", id);
+    const data = await elastic.getById("channel", id);
     if (data) {
       // Return response
       res.json({ data });

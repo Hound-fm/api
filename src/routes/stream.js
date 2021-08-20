@@ -2,11 +2,11 @@ import elastic from "../elastic";
 import { ValidationError } from "../middlewares/errorHandler";
 import { validationResult } from "express-validator";
 
-async function TrackRoute(req, res, next) {
+async function EpisodeRoute(req, res, next) {
   try {
     const validation = validationResult(req).throw();
     const { id } = req.params;
-    const data = await elastic.getById("music_recordings", id);
+    const data = await elastic.getById("stream", id);
     if (data) {
       // Return response
       res.json({ data });
@@ -20,4 +20,4 @@ async function TrackRoute(req, res, next) {
 }
 
 
-export default TrackRoute;
+export default EpisodeRoute;
