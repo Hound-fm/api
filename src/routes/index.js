@@ -6,9 +6,8 @@ import { validateId, validateSearchQuery } from "../middlewares/validation";
 
 const routes = [
   { path: "/", route: home, validators: [] },
-  { path: "/search", route: SearchRoute, validators: [validateSearchQuery] },
   {
-    path: "/search_autocomplete",
+    path: "/search",
     route: AutocompleteRoute,
     validators: [validateSearchQuery],
   },

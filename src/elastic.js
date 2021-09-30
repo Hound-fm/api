@@ -1,17 +1,19 @@
 import { Client } from "@elastic/elasticsearch";
 
-const AutocompleteIndices = [
+const AUTOCOMPLETE_INDICES = [
   "artist",
   "music_recording",
   "podcast_episode",
   "podcast_series",
 ];
 
-const AutocompleteStreamQuery = {
+const SEARCH_INDICES = [...AUTOCOMPLETE_INDICES, "genre"];
+
+const AUTOCOMPLETE_STREAM_QUERY = {
   multi_match: {
     query: "",
     type: "bool_prefix",
-    fuzziness: 2,
+    fuzziness: 3,
     operator: "or",
     fields: [
       "title^1.50",
@@ -20,14 +22,14 @@ const AutocompleteStreamQuery = {
       "title._index_prefix^0.25",
       "name^0.25",
       "channel_title^0.5",
-      "genres^1.25",
-      "genres._2gram^1.15",
-      "genres._3gram^1.10",
+      "genres^0.25",
+      "genres._2gram^0.15",
+      "genres._3gram^0.10",
     ],
   },
 };
 
-const AutocompleteChannelQuery = {
+const AUTOCOMPLETE_CHANNEL_QUERY = {
   multi_match: {
     query: "",
     type: "bool_prefix",
@@ -39,9 +41,24 @@ const AutocompleteChannelQuery = {
       "channel_title._3gram^0.75",
       "channel_title._index_prefix^0.25",
       "channel_name^0.5",
-      "genres^1.25",
-      "genres._2gram^1.15",
-      "genres._3gram^1.10",
+      "genres^0.25",
+      "genres._2gram^0.15",
+      "genres._3gram^0.10",
+    ],
+  },
+};
+
+const AUTOCOMPLETE_GENRE_QUERY = {
+  multi_match: {
+    query: "",
+    type: "bool_prefix",
+    fuzziness: 2,
+    operator: "or",
+    fields: [
+      "label^1.50",
+      "label._2gram^0.5",
+      "label._3gram^0.75",
+      "label._index_prefix^0.25",
     ],
   },
 };
@@ -57,28 +74,30 @@ class Elastic {
     });
   }
 
-  async search(index, query, size = 5) {
-    const { body } = await this.client.search({ index, body: { size, query } });
-    return body;
-  }
-
-  async autocomplete(query, size = 5, fuzziness = 0.25) {
+  async autocomplete(query, size = 5, fuzziness = 2) {
     const search_queries = [];
 
-    AutocompleteIndices.forEach((index, i) => {
-      let autocompleteQuery = AutocompleteStreamQuery;
+    AUTOCOMPLETE_INDICES.forEach((index, i) => {
+      let autocompleteQuery = AUTOCOMPLETE_STREAM_QUERY;
       if (index == "artist" || index == "podcast_series") {
-        autocompleteQuery = AutocompleteChannelQuery;
+        autocompleteQuery = AUTOCOMPLETE_CHANNEL_QUERY;
       }
       autocompleteQuery["multi_match"]["query"] = query;
       search_queries.push({ index: `${index}_autocomplete` });
       search_queries.push({ size, query: autocompleteQuery });
     });
 
+    const genreQuery = AUTOCOMPLETE_GENRE_QUERY;
+    genreQuery["multi_match"]["query"] = query;
+    search_queries.push({ index: "genre" });
+    search_queries.push({ size, query: genreQuery });
+
     const results = {};
     const { body } = await this.client.msearch({ body: search_queries });
+
     body.responses.forEach((response, i) => {
-      results[AutocompleteIndices[i]] = response.hits;
+      const category = SEARCH_INDICES[i];
+      results[category] = response.hits;
     });
 
     return results;
