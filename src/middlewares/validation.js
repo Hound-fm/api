@@ -11,6 +11,13 @@ import {
 const groups = ["latest", "popular"];
 const categories = ["music", "podcast", "audiobook", "sfx"];
 
+const SEARCH_TYPES = [
+  "artist",
+  "music_recording",
+  "podcast_series",
+  "podcast_episode",
+];
+
 const isHex = (str) => {
   const hex = /[0-9A-Fa-f]{6}/g;
   return hex.test(str);
@@ -24,12 +31,14 @@ export const validateId = param("id")
   .trim()
   .custom((value) => isClaimID(value) || Promise.reject(ERROR_404));
 
+export const validateSearchQuery = query("q").optional().not().isEmpty().trim();
 
-  export const validateSearchQuery = query("q")
-    .optional()
-    .not()
-    .isEmpty()
-    .trim()
+export const validateSearchType = query("type")
+  .optional()
+  .not()
+  .isEmpty()
+  .trim()
+  .isIn(SEARCH_TYPES);
 
 export const validateGroup = query("group")
   .optional()

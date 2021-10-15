@@ -3,8 +3,8 @@ import { Client } from "@elastic/elasticsearch";
 const AUTOCOMPLETE_INDICES = [
   "artist",
   "music_recording",
-  "podcast_episode",
   "podcast_series",
+  "podcast_episode",
 ];
 
 const SEARCH_INDICES = [...AUTOCOMPLETE_INDICES, "genre"];
@@ -16,15 +16,12 @@ const AUTOCOMPLETE_STREAM_QUERY = {
     fuzziness: 3,
     operator: "or",
     fields: [
-      "title^1.50",
-      "title._2gram^0.5",
-      "title._3gram^0.75",
-      "title._index_prefix^0.25",
+      "title^1.25",
+      "title._2gram^0.54",
+      "title._3gram^0.25",
       "name^0.25",
-      "channel_title^0.5",
-      "genres^0.25",
-      "genres._2gram^0.15",
-      "genres._3gram^0.10",
+      "channel_title^0.1",
+      "genres^0.1",
     ],
   },
 };
@@ -33,17 +30,14 @@ const AUTOCOMPLETE_CHANNEL_QUERY = {
   multi_match: {
     query: "",
     type: "bool_prefix",
-    fuzziness: 2,
+    fuzziness: 3,
     operator: "or",
     fields: [
-      "channel_title^1.50",
-      "channel_title._2gram^0.5",
+      "channel_title^1.75",
+      "channel_title._2gram^0.80",
       "channel_title._3gram^0.75",
-      "channel_title._index_prefix^0.25",
       "channel_name^0.5",
-      "genres^0.25",
-      "genres._2gram^0.15",
-      "genres._3gram^0.10",
+      "genres^0.1",
     ],
   },
 };
@@ -54,13 +48,15 @@ const AUTOCOMPLETE_GENRE_QUERY = {
     type: "bool_prefix",
     fuzziness: 2,
     operator: "or",
-    fields: [
-      "label^1.50",
-      "label._2gram^0.5",
-      "label._3gram^0.75",
-      "label._index_prefix^0.25",
-    ],
+    fields: ["label^2", "label._2gram^0.8", "label._3gram^0.75"],
   },
+};
+
+const CATEGORY_MAPPINGS = {
+  artist: { term: "channel_type", index: "channel" },
+  podcast_series: { term: "channel_type", index: "channel" },
+  podcast_episode: { term: "stream_type", index: "stream" },
+  music_recording: { term: "stream_type", index: "stream" },
 };
 
 class Elastic {
@@ -74,7 +70,32 @@ class Elastic {
     });
   }
 
-  async autocomplete(query, size = 5, fuzziness = 2) {
+  async searchType(category, query) {
+    // Multisearch query
+    const categoryTerm = CATEGORY_MAPPINGS[category].term;
+    const categoryQuery = AUTOCOMPLETE_STREAM_QUERY;
+    categoryQuery["multi_match"]["query"] = query;
+    // Filter by category
+    const filter = { term: {} };
+    filter.term[categoryTerm] = category;
+    // Full query
+    const elasticQuery = {
+      bool: {
+        filter,
+        must: {
+          multi_match: categoryQuery["multi_match"],
+        },
+      },
+    };
+    const { body } = await this.client.search({
+      size: 500,
+      index: CATEGORY_MAPPINGS[category].index,
+      body: { query: elasticQuery },
+    });
+    return body;
+  }
+
+  async autocomplete(query, size = 8, fuzziness = 2) {
     const search_queries = [];
 
     AUTOCOMPLETE_INDICES.forEach((index, i) => {

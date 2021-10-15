@@ -2,15 +2,63 @@ import url from "url";
 import elastic from "../elastic";
 import { ValidationError } from "../middlewares/errorHandler";
 
+function processResults(results) {
+  let maxScore = 0;
+  let tracksMaxScore = 0;
+  let topResult = null;
+  let topTracks = [];
+  let finalResults = {};
+
+  for (let key in results) {
+    const result = results[key];
+
+    if (result.hits && result.hits.length) {
+      finalResults[key] = result;
+    }
+
+    if (key === "music_recording") {
+      if (result.total.value > 0) {
+        topTracks = result.hits.slice(0, 4);
+        tracksMaxScore = result.max_score;
+      }
+    }
+    if (key === "podcast_episode") {
+      if (
+        topTracks.length === 0 ||
+        (tracksMaxScore < result.max_score && result.total.value > 0)
+      ) {
+        topTracks = result.hits.slice(0, 4);
+        delete finalResults.podcast_episode;
+      } else {
+        delete finalResults.music_recording;
+      }
+    }
+    if (result.max_score > 0 && result.max_score > maxScore) {
+      maxScore = result.max_score;
+      topResult = result.hits[0];
+    }
+  }
+  return {
+    topResult,
+    topTracks,
+    results: finalResults,
+  };
+}
+
 export async function AutocompleteRoute(req, res, next) {
   try {
     // const validation = validationResult(req).throw();
     // Return response
-    const { q } = req.query;
+    const { q, type } = req.query;
     // Handle search query
     if (q && q.length) {
-      const results = await elastic.autocomplete(q);
-      res.json({ data: results });
+      if (type) {
+        const results = await elastic.searchType(type, q);
+        res.json({ data: results });
+      } else {
+        const results = await elastic.autocomplete(q);
+        res.json({ data: processResults(results) });
+      }
     } else {
       // Handle empty search query
       next();
