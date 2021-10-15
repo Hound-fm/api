@@ -21,7 +21,7 @@
     "rate-limiter-flexible": "^2.2.4"
   },
   "devDependencies": {
-    "nodemon": "^2.0.12",
+    "nodemon": "^2.0.13",
     "sucrase": "^3.20.1"
   }
 }
