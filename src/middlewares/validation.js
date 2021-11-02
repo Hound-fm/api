@@ -16,6 +16,7 @@ const SEARCH_TYPES = [
   "music_recording",
   "podcast_series",
   "podcast_episode",
+  "genre",
 ];
 
 const isHex = (str) => {

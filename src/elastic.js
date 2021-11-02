@@ -1,5 +1,5 @@
 import { Client } from "@elastic/elasticsearch";
-
+import { POPULAR_SCORE } from "./scores.js";
 const AUTOCOMPLETE_INDICES = [
   "artist",
   "music_recording",
@@ -53,11 +53,58 @@ const AUTOCOMPLETE_GENRE_QUERY = {
 };
 
 const CATEGORY_MAPPINGS = {
+  genre: { term: "genre", index: "genre" },
   artist: { term: "channel_type", index: "channel" },
   podcast_series: { term: "channel_type", index: "channel" },
   podcast_episode: { term: "stream_type", index: "stream" },
   music_recording: { term: "stream_type", index: "stream" },
 };
+
+function getExploreQuery(streamType, sortBy, genre, size) {
+  const filter = [];
+  const elasticQuery = {};
+  const defaultQuery = { match_all: {} };
+
+  // Filter by streamType
+  if (streamType) {
+    filter.push({
+      term: { stream_type: streamType },
+    });
+  }
+
+  if (genre) {
+    // Filter by genre
+    filter.push({
+      term: { genres: genre },
+    });
+  }
+
+  if (sortBy) {
+    if (sortBy == "latest") {
+      elasticQuery.sort = [{ release_date: { order: "desc" } }];
+      elasticQuery.query = defaultQuery;
+      if (filter.length > 0) {
+        elasticQuery.query = { bool: { filter } };
+      }
+    }
+    if (sortBy == "popular") {
+      elasticQuery.query = {
+        function_score: {
+          score_mode: "sum",
+          boost_mode: "sum",
+        },
+      };
+
+      elasticQuery.query.function_score.functions = POPULAR_SCORE;
+      elasticQuery.query.function_score.query = defaultQuery;
+      if (filter.length > 0) {
+        elasticQuery.query.function_score.query = { bool: { filter } };
+      }
+    }
+  }
+
+  return elasticQuery;
+}
 
 class Elastic {
   constructor() {
@@ -70,9 +117,47 @@ class Elastic {
     });
   }
 
+  async explore(streamType, sortBy, genre, size = 25) {
+    let query = {};
+
+    if (sortBy) {
+      // Single query
+      query = getExploreQuery(streamType, sortBy, genre);
+      // Run query
+      const { body } = await this.client.search({
+        size: size,
+        index: "stream",
+        body: query,
+      });
+
+      return body;
+    } else {
+      // Multi query
+      query = [];
+      query.push({ index: "stream" });
+      query.push({
+        size: 25,
+        ...getExploreQuery(streamType, "latest", genre),
+      });
+      query.push({ index: "stream" });
+      query.push({
+        size: 25,
+        ...getExploreQuery(streamType, "popular", genre),
+      });
+
+      const { body } = await this.client.msearch({ body: query });
+      return body;
+    }
+  }
+
   async searchType(category, query) {
     // Multisearch query
-    const categoryTerm = CATEGORY_MAPPINGS[category].term;
+    const categoryTerm = CATEGORY_MAPPINGS[category]
+      ? CATEGORY_MAPPINGS[category].term
+      : null;
+    if (!categoryTerm) {
+      return false;
+    }
     const categoryQuery = AUTOCOMPLETE_STREAM_QUERY;
     categoryQuery["multi_match"]["query"] = query;
     // Filter by category

@@ -12,22 +12,30 @@ function processResults(results) {
   for (let key in results) {
     const result = results[key];
 
+    // Next
+    if (!result) break;
+
     if (result.hits && result.hits.length) {
       finalResults[key] = result;
     }
 
     if (key === "music_recording") {
       if (result.total.value > 0) {
-        topTracks = result.hits.slice(0, 4);
+        topTracks = {};
+        topTracks.total = result.total;
+        topTracks.hits = result.hits.slice(0, 4);
         tracksMaxScore = result.max_score;
       }
     }
+
     if (key === "podcast_episode") {
       if (
         topTracks.length === 0 ||
         (tracksMaxScore < result.max_score && result.total.value > 0)
       ) {
-        topTracks = result.hits.slice(0, 4);
+        topTracks = {};
+        topTracks.total = result.total;
+        topTracks.hits = result.hits.slice(0, 4);
         delete finalResults.podcast_episode;
       } else {
         delete finalResults.music_recording;
@@ -45,7 +53,7 @@ function processResults(results) {
   };
 }
 
-export async function AutocompleteRoute(req, res, next) {
+export default async function SearchRoute(req, res, next) {
   try {
     // const validation = validationResult(req).throw();
     // Return response
@@ -54,7 +62,11 @@ export async function AutocompleteRoute(req, res, next) {
     if (q && q.length) {
       if (type) {
         const results = await elastic.searchType(type, q);
-        res.json({ data: results });
+        if (results) {
+          res.json({ data: results });
+        } else {
+          next();
+        }
       } else {
         const results = await elastic.autocomplete(q);
         res.json({ data: processResults(results) });
@@ -64,7 +76,7 @@ export async function AutocompleteRoute(req, res, next) {
       next();
     }
   } catch (err) {
-    console.info(err);
+    console.error(err);
     const error = new ValidationError(err, 404);
     next(error);
   }

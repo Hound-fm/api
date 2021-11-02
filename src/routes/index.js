@@ -1,5 +1,6 @@
 import home from "./home";
-import { SearchRoute, AutocompleteRoute } from "./search";
+import ExploreRoute from "./explore";
+import SearchRoute from "./search";
 import StreamRoute from "./stream";
 import ChannelRoute from "./channel";
 import {
@@ -11,8 +12,13 @@ import {
 const routes = [
   { path: "/", route: home, validators: [] },
   {
+    path: "/explore",
+    route: ExploreRoute,
+    validators: [validateSearchType],
+  },
+  {
     path: "/search",
-    route: AutocompleteRoute,
+    route: SearchRoute,
     validators: [validateSearchQuery, validateSearchType],
   },
   { path: "/stream/:id", route: StreamRoute, validators: [validateId] },
