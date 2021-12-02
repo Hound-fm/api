@@ -92,6 +92,55 @@ const CATEGORY_MAPPINGS = {
   music_recording: { term: "stream_type", index: "stream" },
 };
 
+const SUBGENRES = {
+  jazz: ["free jazz", "contemporary jazz", "swing"],
+  pop: ["pop rock"],
+  reagge: ["reggae", "dub"],
+  edm: [
+    "dubstep",
+    "future bass, hardstyle",
+    "rave",
+    "club",
+    "dance",
+    "garage",
+    "jungle",
+    "trance",
+    "melodic trance",
+    "vocal trance",
+  ],
+  ebm: ["futurepop"],
+  electronic: [
+    "synthwave",
+    "vaporwave",
+    "trance",
+    "vocal trance",
+    "melodic trance",
+    "drum and bass",
+    "downtempo",
+    "ebm",
+    "idm",
+    "futurepop",
+    "gabber",
+    "hardcore",
+    "breakbeat",
+    "breaks",
+    "chiptune",
+  ],
+  instrumental: ["klezmer"],
+  dance: ["garage", "jungle"],
+  hardcore: ["gabber"],
+  gabber: ["hardcore"],
+  trance: ["vocal trance", "melodic trance"],
+  rock: ["post-rock", "hard rock", "pop rock", "funk rock", "gothic"],
+  metal: ["heavy metal"],
+  techno: ["minimal techno", "acid techno"],
+  house: ["deep house", "tech house", "garage"],
+  soul: ["funk soul"],
+  funk: ["funk rock", "funk soul"],
+  "heavy metal": ["black metal"],
+  "hip hop": ["horrorcore"],
+};
+
 // Sort by ids order
 function getResolveSortOrder(ids) {
   const params = {};
@@ -130,9 +179,16 @@ function getExploreQuery(stream_type, sortBy, genre, channel_id, size) {
 
   if (genre) {
     // Filter by genre
-    filter.push({
-      term: { genres: genre },
-    });
+
+    if (SUBGENRES[genre]) {
+      filter.push({
+        terms: { genres: [genre, ...SUBGENRES[genre]] },
+      });
+    } else {
+      filter.push({
+        term: { genres: genre },
+      });
+    }
   }
 
   if (channel_id) {
@@ -238,27 +294,36 @@ class Elastic {
   }
 
   async searchType(category, query) {
+    let categoryQuery;
+    let elasticQuery;
+
     // Multisearch query
-    const categoryTerm = CATEGORY_MAPPINGS[category]
-      ? CATEGORY_MAPPINGS[category].term
-      : null;
-    if (!categoryTerm) {
-      return false;
-    }
-    const categoryQuery = AUTOCOMPLETE_STREAM_QUERY;
-    categoryQuery["multi_match"]["query"] = query;
-    // Filter by category
-    const filter = { term: {} };
-    filter.term[categoryTerm] = category;
-    // Full query
-    const elasticQuery = {
-      bool: {
-        filter,
-        must: {
-          multi_match: categoryQuery["multi_match"],
+    if (category === "genre") {
+      categoryQuery = AUTOCOMPLETE_GENRE_QUERY;
+      categoryQuery["multi_match"]["query"] = query;
+      elasticQuery = categoryQuery;
+    } else {
+      const categoryTerm = CATEGORY_MAPPINGS[category]
+        ? CATEGORY_MAPPINGS[category].term
+        : null;
+      if (!categoryTerm) {
+        return false;
+      }
+      categoryQuery = AUTOCOMPLETE_STREAM_QUERY;
+      categoryQuery["multi_match"]["query"] = query;
+      // Filter by category
+      const filter = { term: {} };
+      filter.term[categoryTerm] = category;
+      // Full query
+      elasticQuery = {
+        bool: {
+          filter,
+          must: {
+            multi_match: categoryQuery["multi_match"],
+          },
         },
-      },
-    };
+      };
+    }
     const { body } = await this.client.search({
       size: 500,
       index: CATEGORY_MAPPINGS[category].index,
