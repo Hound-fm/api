@@ -1,13 +1,14 @@
 import { Client } from "@elastic/elasticsearch";
 import { POPULAR_SCORE } from "./scores.js";
-const AUTOCOMPLETE_INDICES = [
+
+const AUTOCOMPLETE_CATEGORIES = [
   "artist",
   "music_recording",
   "podcast_series",
   "podcast_episode",
 ];
 
-const SEARCH_INDICES = [...AUTOCOMPLETE_INDICES, "genre"];
+const SEARCH_INDICES = [...AUTOCOMPLETE_CATEGORIES, "genre"];
 
 const AUTOCOMPLETE_STREAM_QUERY = {
   multi_match: {
@@ -25,6 +26,37 @@ const AUTOCOMPLETE_STREAM_QUERY = {
     ],
   },
 };
+
+const AUTOCOMPLETE_FILTER_PATH = [
+  "-**_shards",
+  "-**_index",
+  "-responses.**._shards",
+  "-responses.hits.**._index",
+  "-responses.hits.**._type",
+  "-responses.hits.**.took",
+  "-responses.hits.**.score",
+];
+
+const EXPLORE_FILTER_PATH = [
+  "-**_shards",
+  "-**_index",
+  "-responses._shards",
+  "-responses.hits.**._index",
+  "-responses.hits.**._type",
+  "-responses.hits.**.took",
+  "-responses.hits.**.score",
+  "-responses.hits.**.sort",
+];
+
+const EXPLORE_SORTED_FILTER_PATH = [
+  "-**_shards",
+  "-**_index",
+  "-hits.**._index",
+  "-hits.**._type",
+  "-hits.**.took",
+  "-hits.**.score",
+  "-hits.**.sort",
+];
 
 const AUTOCOMPLETE_CHANNEL_QUERY = {
   multi_match: {
@@ -60,15 +92,39 @@ const CATEGORY_MAPPINGS = {
   music_recording: { term: "stream_type", index: "stream" },
 };
 
-function getExploreQuery(streamType, sortBy, genre, size) {
+// Sort by ids order
+function getResolveSortOrder(ids) {
+  const params = {};
+
+  // Override sort order score
+  ids.forEach((id, index) => {
+    params[id] = index;
+  });
+
+  const sort = {
+    _script: {
+      type: "number",
+      script: {
+        params,
+        lang: "painless",
+        source: "params.get(doc._id.value);",
+      },
+      order: "asc",
+    },
+  };
+
+  return sort;
+}
+
+function getExploreQuery(stream_type, sortBy, genre, channel_id, size) {
   const filter = [];
   const elasticQuery = {};
   const defaultQuery = { match_all: {} };
 
   // Filter by streamType
-  if (streamType) {
+  if (stream_type) {
     filter.push({
-      term: { stream_type: streamType },
+      term: { stream_type },
     });
   }
 
@@ -76,6 +132,13 @@ function getExploreQuery(streamType, sortBy, genre, size) {
     // Filter by genre
     filter.push({
       term: { genres: genre },
+    });
+  }
+
+  if (channel_id) {
+    // Filter by channel_id
+    filter.push({
+      term: { channel_id },
     });
   }
 
@@ -117,17 +180,33 @@ class Elastic {
     });
   }
 
-  async explore(streamType, sortBy, genre, size = 25) {
+  async explore({ stream_type, sortBy, genre, channel_id, size = 100 }) {
     let query = {};
 
     if (sortBy) {
       // Single query
-      query = getExploreQuery(streamType, sortBy, genre);
+      let mainQuery = getExploreQuery(stream_type, sortBy, genre, channel_id);
+
+      if (channel_id) {
+        query = [];
+        query.push({ index: "stream" });
+        query.push({ size, ...mainQuery });
+        query.push({ index: "channel" });
+        query.push({ query: { ids: { values: [channel_id] } } });
+
+        const { body } = await this.client.msearch({
+          body: query,
+          filter_path: EXPLORE_FILTER_PATH,
+        });
+        return body;
+      }
+
       // Run query
       const { body } = await this.client.search({
         size: size,
         index: "stream",
-        body: query,
+        body: mainQuery,
+        filter_path: EXPLORE_SORTED_FILTER_PATH,
       });
 
       return body;
@@ -136,16 +215,24 @@ class Elastic {
       query = [];
       query.push({ index: "stream" });
       query.push({
-        size: 25,
-        ...getExploreQuery(streamType, "latest", genre),
+        size,
+        ...getExploreQuery(stream_type, "latest", genre, channel_id),
       });
       query.push({ index: "stream" });
       query.push({
-        size: 25,
-        ...getExploreQuery(streamType, "popular", genre),
+        size,
+        ...getExploreQuery(stream_type, "popular", genre, channel_id),
       });
+      // Channel data
+      if (channel_id) {
+        query.push({ index: "channel" });
+        query.push({ query: { ids: { values: [channel_id] } } });
+      }
 
-      const { body } = await this.client.msearch({ body: query });
+      const { body } = await this.client.msearch({
+        body: query,
+        filter_path: EXPLORE_FILTER_PATH,
+      });
       return body;
     }
   }
@@ -183,14 +270,31 @@ class Elastic {
   async autocomplete(query, size = 8, fuzziness = 2) {
     const search_queries = [];
 
-    AUTOCOMPLETE_INDICES.forEach((index, i) => {
+    AUTOCOMPLETE_CATEGORIES.forEach((category, i) => {
       let autocompleteQuery = AUTOCOMPLETE_STREAM_QUERY;
-      if (index == "artist" || index == "podcast_series") {
+      if (category == "artist" || category == "podcast_series") {
         autocompleteQuery = AUTOCOMPLETE_CHANNEL_QUERY;
       }
       autocompleteQuery["multi_match"]["query"] = query;
-      search_queries.push({ index: `${index}_autocomplete` });
-      search_queries.push({ size, query: autocompleteQuery });
+
+      const elasticQuery = {
+        bool: {
+          must: {
+            multi_match: autocompleteQuery["multi_match"],
+          },
+        },
+      };
+
+      // Filter by category
+      if (category !== "genre") {
+        const filter = { term: {} };
+        const categoryTerm = CATEGORY_MAPPINGS[category].term;
+        filter.term[categoryTerm] = category;
+        elasticQuery["bool"]["filter"] = filter;
+      }
+
+      search_queries.push({ index: CATEGORY_MAPPINGS[category].index });
+      search_queries.push({ size, query: elasticQuery });
     });
 
     const genreQuery = AUTOCOMPLETE_GENRE_QUERY;
@@ -199,7 +303,10 @@ class Elastic {
     search_queries.push({ size, query: genreQuery });
 
     const results = {};
-    const { body } = await this.client.msearch({ body: search_queries });
+    const { body } = await this.client.msearch({
+      body: search_queries,
+      filter_path: AUTOCOMPLETE_FILTER_PATH,
+    });
 
     body.responses.forEach((response, i) => {
       const category = SEARCH_INDICES[i];
@@ -209,18 +316,41 @@ class Elastic {
     return results;
   }
 
-  async getById(index, id) {
+  async resolve(resolveData) {
     try {
-      const result = await this.client.get({ index, id });
-      if (result && result.statusCode) {
-        // Get document data
-        const data = result.body._source;
-        // Add nested id
-        data["id"] = result.body._id;
-        return data;
-      }
-      return false;
+      const queries = [];
+      const results = {};
+      const entries = Object.entries(resolveData);
+
+      entries.forEach(([key, ids]) => {
+        const filter = [];
+        const filterId = { terms: { _id: ids } };
+        const filterType = { term: {} };
+        filterType.term[CATEGORY_MAPPINGS[key].term] = key;
+        filter.push(filterId);
+        filter.push(filterType);
+        queries.push({ index: CATEGORY_MAPPINGS[key].index });
+        queries.push({
+          query: { bool: { filter } },
+          sort: getResolveSortOrder(ids),
+        });
+      });
+
+      const { body } = await this.client.msearch({
+        body: queries,
+        filter_path: AUTOCOMPLETE_FILTER_PATH,
+      });
+
+      body.responses.forEach((response, i) => {
+        const category = entries[i][0];
+        if (category) {
+          results[category] = response.hits;
+        }
+      });
+
+      return results;
     } catch (error) {
+      console.info(error);
       return false;
     }
   }

@@ -32,8 +32,11 @@ class Server {
 
   routes() {
     // Init routes
-    routes.forEach(({ path, route, validators }, i) => {
+    routes.get.forEach(({ path, route, validators }, i) => {
       this.app.get(path, ...validators, route);
+    });
+    routes.post.forEach(({ path, route, validators }, i) => {
+      this.app.post(path, ...validators, route);
     });
     // Handle 404 error
     this.app.get("*", errorMiddleware);

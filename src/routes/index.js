@@ -1,28 +1,35 @@
 import home from "./home";
 import ExploreRoute from "./explore";
 import SearchRoute from "./search";
-import StreamRoute from "./stream";
-import ChannelRoute from "./channel";
+import ResolveRoute from "./resolve";
+
 import {
   validateId,
   validateSearchQuery,
   validateSearchType,
 } from "../middlewares/validation";
 
-const routes = [
-  { path: "/", route: home, validators: [] },
-  {
-    path: "/explore",
-    route: ExploreRoute,
-    validators: [validateSearchType],
-  },
-  {
-    path: "/search",
-    route: SearchRoute,
-    validators: [validateSearchQuery, validateSearchType],
-  },
-  { path: "/stream/:id", route: StreamRoute, validators: [validateId] },
-  { path: "/channel/:id", route: ChannelRoute, validators: [validateId] },
-];
+const routes = {
+  get: [
+    { path: "/", route: home, validators: [] },
+    {
+      path: "/explore",
+      route: ExploreRoute,
+      validators: [validateSearchType],
+    },
+    {
+      path: "/search",
+      route: SearchRoute,
+      validators: [validateSearchQuery, validateSearchType],
+    },
+  ],
+  post: [
+    {
+      path: "/resolve",
+      route: ResolveRoute,
+      validators: [],
+    },
+  ],
+};
 
 export default routes;

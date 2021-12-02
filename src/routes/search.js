@@ -23,7 +23,9 @@ function processResults(results) {
       if (result.total.value > 0) {
         topTracks = {};
         topTracks.total = result.total;
-        topTracks.hits = result.hits.slice(0, 4);
+        if (result && result.hits && result.hits.length) {
+          topTracks.hits = result.hits.slice(0, 4);
+        }
         tracksMaxScore = result.max_score;
       }
     }
@@ -35,7 +37,9 @@ function processResults(results) {
       ) {
         topTracks = {};
         topTracks.total = result.total;
-        topTracks.hits = result.hits.slice(0, 4);
+        if (result && result.hits && result.hits.length) {
+          topTracks.hits = result.hits.slice(0, 4);
+        }
         delete finalResults.podcast_episode;
       } else {
         delete finalResults.music_recording;
