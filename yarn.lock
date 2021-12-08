@@ -363,7 +363,7 @@ etag@~1.8.1:
   resolved "https://registry.yarnpkg.com/etag/-/etag-1.8.1.tgz#41ae2eeb65efa62268aebfea83ac7d79299b0887"
   integrity sha1-Qa4u62XvpiJorr/qg6x9eSmbCIc=
 
-express-validator@^6.12.1:
+express-validator@^6.13.0:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/express-validator/-/express-validator-6.13.0.tgz#270d9e8718386b04b1880b5bb7b2c1c2a91a412b"
   integrity sha512-gvLqMFPwEm+C1CQlF3l695ubY1Shd3AtfI5JDYXM0Ju0A2GsGX+VjjQN7TcHXF6cO8wPgU8hSSFqWecBR0Gx1g==
@@ -971,10 +971,10 @@ range-parser@~1.2.1:
   resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-1.2.1.tgz#3cf37023d199e1c24d1a55b84800c2f3e6468031"
   integrity sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==
 
-rate-limiter-flexible@^2.2.4:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-2.3.1.tgz#e37cd5d8cae26235a425b0dae0a6d336fbf61757"
-  integrity sha512-u4Ual0ssf/RHHxK3rqKo9W2S7ulVoNdCAOrsk1gR9JLtzqg7fGw+yaCeyBAEncsL2n6XqHh/0qJk3BPDn49BjA==
+rate-limiter-flexible@^2.3.6:
+  version "2.3.6"
+  resolved "https://registry.yarnpkg.com/rate-limiter-flexible/-/rate-limiter-flexible-2.3.6.tgz#b1a2549dca91069c8a33d57c08a27262c0356c60"
+  integrity sha512-8DVFOe89rreyut/vzwBI7vgXJynyYoYnH5XogtAKs0F/neAbCTTglXxSJ7fZeZamcFXZDvMidCBvps4KM+1srw==
 
 raw-body@2.4.0:
   version "2.4.0"
