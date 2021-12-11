@@ -94,7 +94,7 @@ const CATEGORY_MAPPINGS = {
 
 const SUBGENRES = {
   jazz: ["free jazz", "contemporary jazz", "swing"],
-  pop: ["pop rock"],
+  pop: ["pop rock", "futurepop"],
   reagge: ["reggae", "dub"],
   edm: [
     "dubstep",
@@ -104,17 +104,11 @@ const SUBGENRES = {
     "dance",
     "garage",
     "jungle",
-    "trance",
-    "melodic trance",
-    "vocal trance",
   ],
   ebm: ["futurepop"],
   electronic: [
     "synthwave",
     "vaporwave",
-    "trance",
-    "vocal trance",
-    "melodic trance",
     "drum and bass",
     "downtempo",
     "ebm",
@@ -126,13 +120,15 @@ const SUBGENRES = {
     "breaks",
     "chiptune",
   ],
+  experimental: ["progressive"],
+  progressive: ["experimental"],
   instrumental: ["klezmer"],
   dance: ["garage", "jungle"],
   hardcore: ["gabber"],
   gabber: ["hardcore"],
-  trance: ["vocal trance", "melodic trance"],
+  trance: ["vocal trance", "melodic trance", "psytrance"],
   rock: ["post-rock", "hard rock", "pop rock", "funk rock", "gothic"],
-  metal: ["heavy metal"],
+  metal: ["heavy metal", "black metal"],
   techno: ["minimal techno", "acid techno"],
   house: ["deep house", "tech house", "garage"],
   soul: ["funk soul"],
@@ -140,6 +136,11 @@ const SUBGENRES = {
   "heavy metal": ["black metal"],
   "hip hop": ["horrorcore"],
 };
+
+
+// Merge complex subgenres
+SUBGENRES.edm = [...SUBGENRES.edm, ...SUBGENRES.trance]
+SUBGENRES.electronic = [...SUBGENRES.electronic, ...SUBGENRES.trance]
 
 // Sort by ids order
 function getResolveSortOrder(ids) {
