@@ -137,10 +137,9 @@ const SUBGENRES = {
   "hip hop": ["horrorcore"],
 };
 
-
 // Merge complex subgenres
-SUBGENRES.edm = [...SUBGENRES.edm, ...SUBGENRES.trance]
-SUBGENRES.electronic = [...SUBGENRES.electronic, ...SUBGENRES.trance]
+SUBGENRES.edm = [...SUBGENRES.edm, ...SUBGENRES.trance];
+SUBGENRES.electronic = [...SUBGENRES.electronic, ...SUBGENRES.trance];
 
 // Sort by ids order
 function getResolveSortOrder(ids) {
@@ -382,7 +381,7 @@ class Elastic {
     return results;
   }
 
-  async resolve(resolveData) {
+  async resolve(resolveData, size = 100) {
     try {
       const queries = [];
       const results = {};
@@ -397,6 +396,7 @@ class Elastic {
         filter.push(filterType);
         queries.push({ index: CATEGORY_MAPPINGS[key].index });
         queries.push({
+          size,
           query: { bool: { filter } },
           sort: getResolveSortOrder(ids),
         });
