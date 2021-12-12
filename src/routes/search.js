@@ -6,50 +6,65 @@ function processResults(results) {
   let maxScore = 0;
   let tracksMaxScore = 0;
   let topResult = null;
-  let topTracks = [];
+  let topTracks = null;
   let finalResults = {};
 
   for (let key in results) {
     const result = results[key];
 
     // Next
-    if (!result) break;
+    if (!result) {
+      continue;
+    }
 
     if (result.hits && result.hits.length) {
       finalResults[key] = result;
     }
 
-    if (key === "music_recording") {
-      if (result.total.value > 0) {
-        topTracks = {};
-        topTracks.total = result.total;
-        if (result && result.hits && result.hits.length) {
-          topTracks.hits = result.hits.slice(0, 4);
-        }
-        tracksMaxScore = result.max_score;
-      }
-    }
-
-    if (key === "podcast_episode") {
-      if (
-        topTracks.length === 0 ||
-        (tracksMaxScore < result.max_score && result.total.value > 0)
-      ) {
-        topTracks = {};
-        topTracks.total = result.total;
-        if (result && result.hits && result.hits.length) {
-          topTracks.hits = result.hits.slice(0, 4);
-        }
-        delete finalResults.podcast_episode;
-      } else {
-        delete finalResults.music_recording;
-      }
-    }
     if (result.max_score > 0 && result.max_score > maxScore) {
       maxScore = result.max_score;
       topResult = result.hits[0];
     }
   }
+
+  if (
+    finalResults.music_recording &&
+    finalResults.music_recording.total.value > 0
+  ) {
+    topTracks = {};
+    topTracks.total = finalResults.music_recording.total;
+    topTracks.hits = finalResults.music_recording.hits.slice(0, 4);
+    tracksMaxScore = finalResults.music_recording.max_score;
+  }
+
+  if (
+    finalResults.podcast_episode &&
+    finalResults.podcast_episode.total.value > 0
+  ) {
+    if (!topTracks || tracksMaxScore < finalResults.podcast_episode) {
+      topTracks = {};
+      topTracks.total = finalResults.podcast_episode.total;
+      topTracks.hits = finalResults.podcast_episode.hits.slice(0, 4);
+
+      delete finalResults.podcast_episode;
+    } else {
+      delete finalResults.music_recording;
+    }
+  }
+
+  if (topResult) {
+    const { stream_type, channel_type, category_type } = topResult._source;
+    const result_type =
+      stream_type || channel_type || (category_type ? "genre" : "");
+    // Remove single duplicate entry from results.
+    if (
+      finalResults[result_type] &&
+      finalResults[result_type].hits.length === 1
+    ) {
+      delete finalResults[result_type];
+    }
+  }
+
   return {
     topResult,
     topTracks,

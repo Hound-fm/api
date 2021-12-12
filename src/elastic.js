@@ -375,7 +375,13 @@ class Elastic {
 
     body.responses.forEach((response, i) => {
       const category = SEARCH_INDICES[i];
-      results[category] = response.hits;
+
+      if (response && response.hits) {
+        const res = response.hits;
+        if (res.hits && res.hits.length) {
+          results[category] = res;
+        }
+      }
     });
 
     return results;
