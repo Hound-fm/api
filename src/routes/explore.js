@@ -6,7 +6,7 @@ export default async function ExploreRoute(req, res, next) {
   try {
     // const validation = validationResult(req).throw();
     let channel;
-    let dataBody = {}
+    let dataBody = {};
     // Return response
     const { type, sortBy, genre, size, channel_id } = req.query;
     // Handle search query
@@ -22,11 +22,8 @@ export default async function ExploreRoute(req, res, next) {
       let data = results.responses || results.hits;
 
       if (results.hits && sortBy) {
-        dataBody = results.hits
-      }
-
-      else if (results && results.responses) {
-
+        dataBody = results.hits;
+      } else if (results && results.responses) {
         if (results.responses.length === 2 && sortBy && channel_id) {
           const channelData = results.responses[1].hits.hits;
           if (channelData) {
@@ -46,20 +43,21 @@ export default async function ExploreRoute(req, res, next) {
         }
 
         if (channel) {
-          dataBody.channel = channel
+          dataBody.channel = channel;
         }
 
         if (data && data.length) {
           data = data.map((response) => response.hits);
-
-          dataBody.latest = data[0]
-          dataBody.popular = data[1]
+          if (data[0].hits) {
+            dataBody.latest = data[0];
+          }
+          if (data[1].hits) {
+            dataBody.popular = data[1];
+          }
         } else {
-          dataBody[sortBy || 'latest'] = data
+          dataBody[sortBy || "latest"] = data;
         }
-
       }
-
 
       res.json({ data: dataBody });
     } else {
