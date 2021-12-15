@@ -1,6 +1,6 @@
 import { Client } from "@elastic/elasticsearch";
 import { POPULAR_SCORE } from "./scores.js";
-
+const MAX_SIZE = 100;
 const AUTOCOMPLETE_CATEGORIES = [
   "artist",
   "music_recording",
@@ -285,7 +285,7 @@ class Elastic {
 
       // Run query
       const { body } = await this.client.search({
-        size: size,
+        size,
         index: "stream",
         body: mainQuery,
         filter_path: EXPLORE_SORTED_FILTER_PATH,
@@ -355,7 +355,7 @@ class Elastic {
       };
     }
     const { body } = await this.client.search({
-      size: 500,
+      size: MAX_SIZE,
       index: CATEGORY_MAPPINGS[category].index,
       body: { query: elasticQuery },
     });
@@ -417,7 +417,7 @@ class Elastic {
     return results;
   }
 
-  async resolve(resolveData, size = 100) {
+  async resolve(resolveData, size = MAX_SIZE) {
     try {
       const queries = [];
       const results = {};
