@@ -165,29 +165,51 @@ function getResolveSortOrder(ids) {
   return sort;
 }
 
-function getExploreQuery(stream_type, sortBy, genre, channel_id, size) {
+function getExploreQuery(explore_type, sortBy, genre, channel_id, size) {
   const filter = [];
   const elasticQuery = {};
   const defaultQuery = { match_all: {} };
+  const exploreChannels =
+    !channel_id &&
+    (explore_type === "artist" ||
+      explore_type === "podcast_series" ||
+      explore_type === "channel");
 
-  // Filter by streamType
-  if (stream_type) {
-    filter.push({
-      term: { stream_type },
-    });
+  // Filter by explore type ( channel_type or stream_type )
+  if (explore_type) {
+    if (exploreChannels) {
+      if (explore_type !== "channel") {
+        filter.push({
+          term: { channel_type: explore_type },
+        });
+      }
+    } else {
+      filter.push({
+        term: { stream_type: explore_type },
+      });
+    }
   }
 
   if (genre) {
     // Filter by genre
-
     if (SUBGENRES[genre]) {
       filter.push({
         terms: { genres: [genre, ...SUBGENRES[genre]] },
       });
+      if (exploreChannels) {
+        filter.push({
+          terms: { content_genres: [genre, ...SUBGENRES[genre]] },
+        });
+      }
     } else {
       filter.push({
         term: { genres: genre },
       });
+      if (exploreChannels) {
+        filter.push({
+          term: { content_genres: genre },
+        });
+      }
     }
   }
 
@@ -220,6 +242,10 @@ function getExploreQuery(stream_type, sortBy, genre, channel_id, size) {
         elasticQuery.query.function_score.query = { bool: { filter } };
       }
     }
+  }
+
+  if (exploreChannels) {
+    elasticQuery.query = { bool: { should: filter } };
   }
 
   return elasticQuery;
@@ -283,6 +309,10 @@ class Elastic {
       if (channel_id) {
         query.push({ index: "channel" });
         query.push({ query: { ids: { values: [channel_id] } } });
+      } else if (genre) {
+        // Channels
+        query.push({ index: "channel" });
+        query.push({ size, ...getExploreQuery("channel", null, genre) });
       }
 
       const { body } = await this.client.msearch({

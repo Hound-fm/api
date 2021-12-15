@@ -34,11 +34,14 @@ export default async function ExploreRoute(req, res, next) {
         }
 
         if (results.responses.length === 3) {
-          const channelData = results.responses[2].hits.hits;
-          if (channelData) {
-            channel = channelData[0]._source;
-            channel.id = channelData[0]._id;
+          const channelData = results.responses[2].hits;
+          if (channelData && channelData.hits && channel_id) {
+            console.info(channelData);
+            channel = channelData.hits[0]._source;
+            channel.id = channelData.hits[0]._id;
             data.pop();
+          } else if (channelData && channelData.hits && !sortBy && genre) {
+            dataBody.channels = channelData;
           }
         }
 
@@ -59,7 +62,15 @@ export default async function ExploreRoute(req, res, next) {
         }
       }
 
-      res.json({ data: dataBody });
+      if (
+        (dataBody && dataBody.total && !dataBody.hits) ||
+        (!sortBy && Object.keys(dataBody).length === 0)
+      ) {
+        // Handle empty response
+        next();
+      } else {
+        res.json({ data: dataBody });
+      }
     } else {
       // Handle empty search query
       next();
