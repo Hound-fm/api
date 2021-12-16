@@ -120,6 +120,7 @@ const SUBGENRES = {
     "breaks",
     "chiptune",
   ],
+  chill: ["chillout"],
   experimental: ["progressive"],
   progressive: ["experimental"],
   instrumental: ["klezmer"],
