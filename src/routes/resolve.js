@@ -18,7 +18,7 @@ async function ResolveRoute(req, res, next) {
 
     const data = await elastic.resolve(resolveData);
 
-    if (data && Object.keys(data).length ) {
+    if (data && Object.keys(data).length > 0) {
       // Return response
       res.json({ data });
     } else {
