@@ -461,11 +461,12 @@ class Elastic {
     }
   }
 
-  async feed(size = MAX_SIZE) {
+  async feed(page = 0, size = MAX_SIZE) {
     try {
       const defaultQuery = { match_all: {} };
       const { body } = await this.client.search({
-        size: MAX_SIZE,
+        from: page * size,
+        size: size,
         index: CATEGORY_MAPPINGS["event"].index,
         body: { query: defaultQuery },
       });
