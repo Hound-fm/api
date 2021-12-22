@@ -1,4 +1,5 @@
 import home from "./home";
+import FeedRoute from "./feed";
 import ExploreRoute from "./explore";
 import SearchRoute from "./search";
 import ResolveRoute from "./resolve";
@@ -21,6 +22,11 @@ const routes = {
       path: "/search",
       route: SearchRoute,
       validators: [validateSearchQuery, validateSearchType],
+    },
+    {
+      path: "/feed",
+      route: FeedRoute,
+      validators: [],
     },
   ],
   post: [

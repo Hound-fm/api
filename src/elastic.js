@@ -86,6 +86,7 @@ const AUTOCOMPLETE_GENRE_QUERY = {
 
 const CATEGORY_MAPPINGS = {
   genre: { term: "genre", index: "genre" },
+  event: { term: "event_type", index: "event" },
   artist: { term: "channel_type", index: "channel" },
   podcast_series: { term: "channel_type", index: "channel" },
   podcast_episode: { term: "stream_type", index: "stream" },
@@ -194,21 +195,23 @@ function getExploreQuery(explore_type, sortBy, genre, channel_id, size) {
   if (genre) {
     // Filter by genre
     if (SUBGENRES[genre]) {
-      filter.push({
-        terms: { genres: [genre, ...SUBGENRES[genre]] },
-      });
       if (exploreChannels) {
         filter.push({
           terms: { content_genres: [genre, ...SUBGENRES[genre]] },
         });
+      } else {
+        filter.push({
+          terms: { genres: [genre, ...SUBGENRES[genre]] },
+        });
       }
     } else {
-      filter.push({
-        term: { genres: genre },
-      });
       if (exploreChannels) {
         filter.push({
           term: { content_genres: genre },
+        });
+      } else {
+        filter.push({
+          term: { genres: genre },
         });
       }
     }
@@ -452,6 +455,21 @@ class Elastic {
       });
 
       return results;
+    } catch (error) {
+      console.info(error);
+      return false;
+    }
+  }
+
+  async feed(size = MAX_SIZE) {
+    try {
+      const defaultQuery = { match_all: {} };
+      const { body } = await this.client.search({
+        size: MAX_SIZE,
+        index: CATEGORY_MAPPINGS["event"].index,
+        body: { query: defaultQuery },
+      });
+      return body;
     } catch (error) {
       console.info(error);
       return false;
