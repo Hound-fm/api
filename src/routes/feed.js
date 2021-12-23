@@ -3,7 +3,7 @@ import { ValidationError } from "../middlewares/errorHandler";
 import { validationResult } from "express-validator";
 
 const FEED_MAX_PAGE_SIZE = 25;
-const FEED_MAX_PAGES = 10;
+const FEED_MAX_PAGES = 40;
 
 function clamp(number, min, max) {
   return Math.max(min, Math.min(number, max));
