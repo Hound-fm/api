@@ -134,7 +134,9 @@ const SUBGENRES = {
   techno: ["minimal techno", "acid techno"],
   house: ["deep house", "tech house", "garage"],
   soul: ["funk soul"],
-  funk: ["funk rock", "funk soul"],
+  funk: ["funk rock", "funk soul", "electro", "electro-funk"],
+  electro: ["electro-funk"],
+  "electro-funk": ["electro"],
   "heavy metal": ["black metal"],
   "hip hop": ["horrorcore"],
 };
