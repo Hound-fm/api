@@ -99,12 +99,13 @@ const SUBGENRES = {
   reagge: ["reggae", "dub"],
   edm: [
     "dubstep",
-    "future bass, hardstyle",
     "rave",
     "club",
     "dance",
     "garage",
     "jungle",
+    "hardstyle",
+    "future bass",
   ],
   ebm: ["futurepop"],
   electronic: [
@@ -113,7 +114,6 @@ const SUBGENRES = {
     "drum and bass",
     "downtempo",
     "idm",
-    "futurepop",
     "gabber",
     "hardcore",
     "breakbeat",
