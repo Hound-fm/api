@@ -95,7 +95,7 @@ const CATEGORY_MAPPINGS = {
 
 const SUBGENRES = {
   jazz: ["free jazz", "contemporary jazz", "swing"],
-  pop: ["pop rock", "futurepop"],
+  pop: ["synth-pop", "pop rock", "futurepop", "indie pop"],
   reagge: ["reggae", "dub"],
   edm: [
     "dubstep",
@@ -112,7 +112,6 @@ const SUBGENRES = {
     "vaporwave",
     "drum and bass",
     "downtempo",
-    "ebm",
     "idm",
     "futurepop",
     "gabber",
@@ -120,30 +119,65 @@ const SUBGENRES = {
     "breakbeat",
     "breaks",
     "chiptune",
+    "trip hop",
+    "glitch hop",
   ],
-  chill: ["chillout"],
+  chill: ["chillstep", "chillwave", "lo-fi hip hop"],
   experimental: ["progressive"],
   progressive: ["experimental"],
   instrumental: ["klezmer"],
   dance: ["garage", "jungle"],
   hardcore: ["gabber"],
   gabber: ["hardcore"],
-  trance: ["vocal trance", "melodic trance", "psytrance"],
-  rock: ["post-rock", "hard rock", "pop rock", "funk rock", "gothic"],
-  metal: ["heavy metal", "black metal"],
-  techno: ["minimal techno", "acid techno"],
-  house: ["deep house", "tech house", "garage"],
-  soul: ["funk soul"],
-  funk: ["funk rock", "funk soul", "electro", "electro-funk"],
   electro: ["electro-funk"],
+  psychedelic: ["psychedelic rock", "psychedelic folk"],
+  trance: ["vocal trance", "melodic trance", "psytrance"],
+  rock: [
+    "alternative rock",
+    "psychedelic rock",
+    "post-rock",
+    "hard rock",
+    "pop rock",
+    "funk rock",
+    "gothic",
+    "indie rock",
+  ],
+  metal: ["heavy metal", "black metal"],
+  techno: ["minimal techno", "acid techno", "dub techno"],
+  house: ["deep house", "tech house", "progressive house", "garage"],
+  soul: ["funk soul", "neo soul"],
+  funk: ["funk rock", "funk soul", "electro", "electro-funk"],
+  folk: [
+    "neofolk",
+    "contemporary folk",
+    "dark folk",
+    "folk metal",
+    "folk pop",
+    "folk punk",
+    "folk rock",
+    "folktronica",
+    "indie fold",
+    "irish folk",
+    "progressive folk",
+    "free folk",
+    "freak folk",
+    "psychedelic folk",
+  ],
   "electro-funk": ["electro"],
+  "drum and bass": ["techstep"],
   "heavy metal": ["black metal"],
-  "hip hop": ["horrorcore"],
+  "hip hop": ["horrorcore", "glitch hop", "lo-fi hip hop"],
 };
 
 // Merge complex subgenres
 SUBGENRES.edm = [...SUBGENRES.edm, ...SUBGENRES.trance];
-SUBGENRES.electronic = [...SUBGENRES.electronic, ...SUBGENRES.trance];
+SUBGENRES.electronic = [
+  ...SUBGENRES.electronic,
+  ...SUBGENRES.trance,
+  ...SUBGENRES.ebm,
+  ...SUBGENRES.edm,
+  ...SUBGENRES["drum and bass"],
+];
 
 // Sort by ids order
 function getResolveSortOrder(ids) {
