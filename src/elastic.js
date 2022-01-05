@@ -111,6 +111,8 @@ const SUBGENRES = {
   ],
   ebm: ["futurepop"],
   electronic: [
+    "electro",
+    "electroclash",
     "synthwave",
     "vaporwave",
     "drum and bass",
@@ -128,7 +130,7 @@ const SUBGENRES = {
   experimental: ["progressive"],
   progressive: ["experimental"],
   instrumental: ["klezmer"],
-  dance: ["garage", "jungle"],
+  dance: ["garage", "jungle", "disco"],
   hardcore: ["gabber"],
   gabber: ["hardcore"],
   electro: ["electro-funk"],
@@ -170,7 +172,7 @@ const SUBGENRES = {
   "electro-funk": ["electro"],
   "drum and bass": ["techstep"],
   "heavy metal": ["black metal"],
-  "hip hop": ["horrorcore", "glitch hop", "lo-fi hip hop"],
+  "hip hop": ["horrorcore", "glitch hop", "lo-fi hip hop", "trap"],
 };
 
 // Merge complex subgenres
@@ -180,6 +182,7 @@ SUBGENRES.electronic = [
   ...SUBGENRES.trance,
   ...SUBGENRES.ebm,
   ...SUBGENRES.edm,
+  ...SUBGENRES.electro,
   ...SUBGENRES["drum and bass"],
 ];
 
