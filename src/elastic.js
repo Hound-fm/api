@@ -1,6 +1,8 @@
 import { Client } from "@elastic/elasticsearch";
 import { POPULAR_SCORE } from "./scores.js";
-const MAX_SIZE = 100;
+
+const MAX_SIZE = 250;
+
 const AUTOCOMPLETE_CATEGORIES = [
   "artist",
   "music_recording",
@@ -302,7 +304,7 @@ class Elastic {
     });
   }
 
-  async explore({ stream_type, sortBy, genre, channel_id, size = 100 }) {
+  async explore({ stream_type, sortBy, genre, channel_id, size = MAX_SIZE }) {
     let query = {};
 
     if (sortBy) {
