@@ -100,8 +100,11 @@ const SUBGENRES = {
   pop: ["synth-pop", "pop rock", "futurepop", "indie pop"],
   reagge: ["reggae", "dub"],
   edm: [
+    "idm",
     "dubstep",
     "rave",
+    "gabber",
+    "hardcore",
     "club",
     "dance",
     "garage",
@@ -111,13 +114,14 @@ const SUBGENRES = {
   ],
   ebm: ["futurepop"],
   electronic: [
+    "glitch",
     "electro",
     "electroclash",
     "synthwave",
+    "synth-pop",
     "vaporwave",
     "drum and bass",
     "downtempo",
-    "idm",
     "gabber",
     "hardcore",
     "breakbeat",
@@ -127,8 +131,13 @@ const SUBGENRES = {
     "glitch hop",
   ],
   chill: ["chillstep", "chillwave", "lo-fi hip hop"],
-  experimental: ["progressive"],
-  progressive: ["experimental"],
+  progressive: [
+    "experimental",
+    "progressive rock",
+    "progressive house",
+    "progressive folk",
+  ],
+  industrial: ["noise"],
   instrumental: ["klezmer"],
   dance: ["garage", "jungle", "disco"],
   hardcore: ["gabber"],
@@ -146,6 +155,7 @@ const SUBGENRES = {
     "psychedelic rock",
     "progressive rock",
     "post-rock",
+    "shoegaze",
     "gothic",
   ],
   metal: ["heavy metal", "black metal"],
@@ -173,10 +183,13 @@ const SUBGENRES = {
   "drum and bass": ["techstep"],
   "heavy metal": ["black metal"],
   "hip hop": ["horrorcore", "glitch hop", "lo-fi hip hop", "trap"],
+  "indie rock": ["shoegaze"],
+  "alternative rock": ["shoegaze"],
 };
 
 // Merge complex subgenres
 SUBGENRES.edm = [...SUBGENRES.edm, ...SUBGENRES.trance];
+SUBGENRES.experimental = SUBGENRES.progressive;
 SUBGENRES.electronic = [
   ...SUBGENRES.electronic,
   ...SUBGENRES.trance,
