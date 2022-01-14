@@ -143,10 +143,11 @@ const SUBGENRES = {
   hardcore: ["gabber"],
   gabber: ["hardcore"],
   electro: ["electro-funk"],
-  psychedelic: ["psychedelic rock", "psychedelic folk"],
+  psychedelic: ["psytrance", "psychedelic rock", "psychedelic folk"],
   trance: ["vocal trance", "melodic trance", "psytrance"],
   rock: [
     "pop rock",
+    "punk rock",
     "hard rock",
     "funk rock",
     "indie rock",
@@ -164,6 +165,8 @@ const SUBGENRES = {
   soul: ["funk soul", "neo soul"],
   funk: ["funk rock", "funk soul", "electro", "electro-funk"],
   folk: [
+    "trova",
+    "flamenco",
     "neofolk",
     "contemporary folk",
     "dark folk",
@@ -189,7 +192,7 @@ const SUBGENRES = {
 
 // Merge complex subgenres
 SUBGENRES.edm = [...SUBGENRES.edm, ...SUBGENRES.trance];
-SUBGENRES.experimental = SUBGENRES.progressive;
+SUBGENRES.experimental = ["improvisation", ...SUBGENRES.progressive];
 SUBGENRES.electronic = [
   ...SUBGENRES.electronic,
   ...SUBGENRES.trance,
